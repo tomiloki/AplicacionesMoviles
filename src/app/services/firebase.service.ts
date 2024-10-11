@@ -1,22 +1,29 @@
 import { Injectable } from '@angular/core';
-import { Firestore, doc, collection } from '@angular/fire/firestore';
+import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/compat/firestore'; // Cambiar si usas otra versión
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FirebaseService {
 
-  constructor(private FireStore: AngularFirestore) { }
+  constructor(private fireStore: AngularFirestore) {}
 
-  createDoc<tipo>(data: tipo, enlace: string) {
-    const userCollection: AngularFirestoreCollection<tipo> =
-                      this.FireStore.collection<tipo>(enlace);
-    return userCollection.add(data);
+  createDoc<T>(data: T, path: string): Promise<any> {
+    const collection: AngularFirestoreCollection<T> = this.fireStore.collection<T>(path);
+    return collection.add(data);
   }
 
-  createIdDoc(): string {
-    return this.FireStore.createId();
-}
+  // Funciones adicionales que puedes necesitar:
+  getDoc<T>(path: string, id: string): Observable<T | undefined> {
+    return this.fireStore.collection<T>(path).doc(id).valueChanges();
+  }  
 
-}
+  updateDoc<T>(data: Partial<T>, path: string, id: string): Promise<void> {
+    return this.fireStore.collection(path).doc(id).update(data);
+  }
 
+  deleteDoc(path: string, id: string): Promise<void> {
+    return this.fireStore.collection(path).doc(id).delete();
+  }
+}

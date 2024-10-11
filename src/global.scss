@@ -35,3 +35,29 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import "@ionic/angular/css/palettes/dark.system.css";
+
+
+/* global.scss */
+
+// archivo: src/app/home/home.page.scss
+
+.page-home {
+    ion-content {
+      --background: #ffffff; /* Ajusta el color de fondo */
+    }
+  
+    .header {
+      font-size: 20px;
+      color: #000; /* Estilo del encabezado */
+    }
+  
+    .content {
+      padding: 16px;
+    }
+  
+    ion-button {
+      --background: #3880ff; /* Ajusta el color de los botones */
+    }
+  }
+  
+  

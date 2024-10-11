@@ -1,57 +1,53 @@
-import { Component, OnInit } from '@angular/core';
-import { ToastController } from '@ionic/angular';
-import { FirebaseService } from '../services/firebase.service';
-import { Usuario } from '../interfaces';
+import { Component } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms'; // Importamos FormBuilder y Validators
+import { FirebaseService } from '../services/firebase.service'; // Asegúrate de que el servicio esté correctamente importado
+import { Usuario } from '../interfaces'; // Importa la interfaz Usuario
+import { ToastController } from '@ionic/angular'; // Para mostrar mensajes
 
 @Component({
   selector: 'app-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
+  templateUrl: './home.page.html',
+  styleUrls: ['./home.page.scss'],
 })
-export class HomePage implements OnInit {
+export class HomePage {
+  userForm: FormGroup;
 
-  numero1: number = 0;
-  numero2: number = 0;
-  resultado: number = 0;
-  edades: number[] = [];
-  usuarios: Usuario[] = [];
-
-  constructor(public toastController: ToastController,
-              public firebaseService: FirebaseService) {
-    console.log("hola en el constructor");
-    this.initUsers();
-  }
-
-  ngOnInit(): void {
-    console.log("hola despies en ngon init");
-    
-  }
-
-  initUsers() {
-    this.edades = [2, 20, 10];
-    this.usuarios = [
-      {
-        nombre: 'Jonathan',
-        apellido: 'Tenesaca',
-        profesion: 'Estudiante',
-        edad: 22,
-        nivel: 5,
-      }
-    ]
-  }
-
-  guardar() {
-    const path = 'usuarios/;'
-    const newUser: Usuario = {
-      nombre: 'Jonathan',
-      apellido: 'Tenesaca',
-      profesion: 'Estudiante',
-      edad: 22,
-      nivel: 5,
-      // id: this.firebaseService.createIdDoc,
-    };
-    this.firebaseService.createDoc<Usuario>(newUser, path).then( res => {
-      console.log('respuesta de Firebase: ', res);
+  constructor(
+    private fb: FormBuilder,
+    private firebaseService: FirebaseService,
+    private toastController: ToastController // Inyectamos el controlador de Toast
+  ) {
+    this.userForm = this.fb.group({
+      nombre: ['', Validators.required],
+      apellido: ['', Validators.required],
+      profesion: ['', Validators.required],
+      edad: ['', [Validators.required, Validators.min(1)]],
+      nivel: ['', [Validators.required, Validators.min(1)]],
     });
+  }
+
+  async guardar() {
+    if (this.userForm.valid) {
+      const newUser: Usuario = this.userForm.value;
+      const path = 'usuarios'; // Corregimos el path
+
+      try {
+        await this.firebaseService.createDoc<Usuario>(newUser, path);
+        this.mostrarMensaje('Usuario guardado correctamente');
+      } catch (error) {
+        this.mostrarMensaje('Error al guardar el usuario');
+        console.error('Error al guardar en Firebase: ', error);
+      }
+    } else {
+      this.mostrarMensaje('Por favor completa todos los campos');
+    }
+  }
+
+  async mostrarMensaje(mensaje: string) {
+    const toast = await this.toastController.create({
+      message: mensaje,
+      duration: 2000,
+    });
+    toast.present();
   }
 }
